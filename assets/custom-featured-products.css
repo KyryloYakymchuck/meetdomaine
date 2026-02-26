@@ -1,0 +1,147 @@
+:root {
+  /* Fonts */
+  --fp-font-body: 'Roboto', sans-serif;
+  --fp-font-badge: 'Franklin Gothic ATF', sans-serif;
+
+  /* Colors */
+  --fp-color-border: #e8e8e8;
+  --fp-color-sale: #ff0000;
+  --fp-color-text: #111111;
+  --fp-color-title: #0a4874;
+  --fp-color-swatch-ring: #fff;
+  --fp-color-swatch-border: #0a4874;
+}
+
+.fp-card {
+  font-family: var(--fp-font-body);
+  width: 100%;
+  max-width: 315px;
+  max-height: 452px;
+}
+
+.fp-card__media {
+  width: 100%;
+  max-width: 315px;
+  max-height: 340px;
+  aspect-ratio: 315 / 340;
+  border: 1px solid var(--fp-color-border);
+  border-radius: 10px;
+}
+
+.fp-card-hover:hover .fp-card__img-primary {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.fp-card__img-secondary {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.fp-card-hover:hover .fp-card__img-secondary {
+  opacity: 1;
+}
+
+.fp-card__badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 5px 13px;
+  font-size: 15.37px;
+  font-weight: 500;
+  line-height: 17.93px;
+  font-family: var(--fp-font-badge);
+  color: var(--fp-color-sale);
+  background-color: transparent;
+  border: 1px solid var(--fp-color-sale);
+  border-radius: 25.61px;
+  letter-spacing: 0;
+  word-spacing: -2px;
+}
+
+.fp-card__badge--sold-out {
+  color: var(--fp-color-text);
+  border-color: var(--fp-color-text);
+}
+
+.fp-card__vendor {
+  font-size: 14px;
+  font-family: var(--fp-font-body);
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--fp-color-text);
+  letter-spacing: 0;
+}
+
+.fp-card__title {
+  font-size: 16px;
+  font-family: var(--fp-font-body);
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--fp-color-title);
+  text-decoration: none;
+  letter-spacing: 0;
+}
+.fp-card__title:hover {
+  text-decoration: underline;
+}
+
+.fp-card__price-sale {
+  font-size: 14px;
+  font-family: var(--fp-font-body);
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--fp-color-sale);
+  letter-spacing: 0;
+}
+
+.fp-card__price-compare {
+  position: relative;
+  font-size: 14px;
+  font-family: var(--fp-font-body);
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--fp-color-text);
+  text-decoration: none;
+  letter-spacing: 0;
+}
+.fp-card__price-compare::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 58%;
+  height: 1px;
+  background-color: currentColor;
+}
+
+.fp-card__price-regular {
+  font-size: 14px;
+  font-family: var(--fp-font-body);
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--fp-color-text);
+}
+
+.fp-card__swatches {
+  gap: 0.8rem;
+}
+
+.fp-card__swatch,
+.fp-card [data-swatch] {
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+.fp-card__swatch--selected,
+.fp-card [data-swatch].fp-card__swatch--selected {
+  box-shadow: 0 0 0 1px var(--fp-color-swatch-ring), 0 0 0 2px var(--fp-color-swatch-border);
+}
+.fp-card__swatch:focus {
+  outline: none;
+}

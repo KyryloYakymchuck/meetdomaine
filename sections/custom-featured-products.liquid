@@ -1,0 +1,219 @@
+{%- liquid
+  assign source = section.settings.source
+  assign products_to_show = section.settings.products_to_show
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+-%}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    prefix: 'tw-',
+    corePlugins: { preflight: false }
+  };
+</script>
+
+{{ 'custom-featured-products.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-featured-products.js' | asset_url }}" defer></script>
+
+{%- style -%}
+  @font-face {
+    font-family: 'Franklin Gothic ATF';
+    src: url({{ 'franklin-gothic-atf.otf' | asset_url }}) format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  #featured-products-{{ section.id }} .fp-grid {
+    grid-template-columns: repeat({{ columns_mobile }}, minmax(0, 1fr));
+  }
+  @media screen and (min-width: 768px) {
+    #featured-products-{{ section.id }} .fp-grid {
+      grid-template-columns: repeat({{ columns_desktop }}, minmax(0, 1fr));
+    } 
+  }
+{%- endstyle -%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding" id="featured-products-{{ section.id }}">
+  <div class="page-width">
+    {%- if section.settings.title != blank -%}
+      <h2 class="tw-text-2xl tw-font-bold tw-mb-6 tw-text-center md:tw-text-left">
+        {{ section.settings.title }}
+      </h2>
+    {%- endif -%}
+
+    {% capture section_newline %}
+{% endcapture %}
+    {%- assign color_swatches_setting = settings.featured_color_swatches | default: 'Orange - #ea580c' -%}
+    <div class="fp-grid tw-grid tw-gap-5"
+         data-featured-products
+         data-section-id="{{ section.id }}">
+      {%- if source == 'collection' and section.settings.collection != blank -%}
+        {%- assign product_list = section.settings.collection.products -%}
+        {%- for product in product_list limit: products_to_show -%}
+          <div class="fp-grid__item">
+            {% render 'custom-featured-card', card_product: product, section_id: section.id, color_swatches_text: color_swatches_setting, newline_char: section_newline %}
+          </div>
+        {%- endfor -%}
+      {%- elsif source == 'manual' -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'product' and block.settings.product != blank -%}
+            <div class="fp-grid__item" {{ block.shopify_attributes }}>
+              {% render 'custom-featured-card', card_product: block.settings.product, section_id: section.id, color_swatches_text: color_swatches_setting, newline_char: section_newline %}
+            </div>
+          {%- endif -%}
+        {%- endfor -%} 
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom featured products",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured products"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Product source",
+      "options": [
+        { "value": "manual", "label": "Manual (pick products below)" },
+        { "value": "collection", "label": "Full collection" }
+      ],
+      "default": "manual"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Used when source is “Full collection”."
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 24,
+      "step": 1,
+      "default": 4,
+      "label": "Maximum products to show",
+      "info": "For collection source only."
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4,
+      "label": "Columns (desktop)"
+    },
+    {
+      "type": "range",
+      "id": "columns_mobile",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2,
+      "label": "Columns (mobile)"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding (mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding (mobile)",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding (desktop)",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding (desktop)",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "limit": 24,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom featured products",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

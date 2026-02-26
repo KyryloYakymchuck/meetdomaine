@@ -1,0 +1,147 @@
+{%- liquid
+  assign product = card_product
+  assign swatches_text = color_swatches_text | default: settings.featured_color_swatches | default: 'Orange - #ea580c'
+  assign newline_char = newline_char | default: fp_newline
+  assign swatch_lines = swatches_text | split: newline_char
+  assign first_option = product.options_with_values | first
+  assign is_on_sale = false
+  assign compare_at = product.selected_or_first_available_variant.compare_at_price
+  assign price = product.selected_or_first_available_variant.price
+  if compare_at != blank and compare_at > price
+    assign is_on_sale = true
+  endif
+-%}
+<div class="fp-card fp-card-hover tw-bg-white tw-overflow-visible tw-h-full tw-flex tw-flex-col"
+     data-featured-card
+     data-product-id="{{ product.id }}"
+     data-section-id="{{ section_id }}">
+  <a href="{{ product.url }}" class="tw-block tw-relative">
+    <div class="fp-card__media tw-relative tw-overflow-hidden">
+      {%- if product.featured_media -%}
+        {%- assign primary_media = product.selected_or_first_available_variant.featured_media | default: product.featured_media -%}
+        {%- assign secondary_media = nil -%}
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}
+            {%- assign opt_val = product.selected_or_first_available_variant.option1 | default: '' -%}
+            {%- assign alt_norm = media.alt | strip | downcase -%}
+            {%- assign opt_norm = opt_val | strip | downcase -%}
+            {%- if alt_norm == opt_norm and media.id != primary_media.id -%}
+              {%- assign secondary_media = media -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        <img class="fp-card__img-primary tw-w-full tw-h-full tw-object-cover tw-p-7"
+             src="{{ primary_media | image_url: width: 533 }}"
+             alt="{{ primary_media.alt | escape }}"
+             width="{{ primary_media.width }}"
+             height="{{ primary_media.height }}"
+             loading="lazy">
+        {%- if secondary_media -%}
+          <img class="fp-card__img-secondary tw-absolute tw-inset-0 tw-w-full tw-h-full tw-object-contain"
+               src="{{ secondary_media | image_url: width: 533 }}"
+               alt="{{ secondary_media.alt | escape }}"
+               width="{{ secondary_media.width }}"
+               height="{{ secondary_media.height }}">
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-apparel-2' | placeholder_svg_tag: 'tw-w-full tw-h-full tw-object-cover' }}
+      {%- endif -%}
+
+      <span class="fp-card__badge fp-card__badge--sold-out" data-badge="sold-out" style="display: {% if product.available == false %}block{% else %}none{% endif %};">{{ 'products.product.sold_out' | t }}</span>
+      <span class="fp-card__badge" data-badge="sale" style="display: {% if product.available and is_on_sale %}block{% else %}none{% endif %};">{{ 'products.product.on_sale' | t }}</span>
+    </div>
+  </a>
+
+  {%- assign selected_option_value = product.selected_or_first_available_variant.option1 -%}
+  {%- if first_option -%}
+    <div class="fp-card__swatches tw-flex tw-flex-wrap tw-mt-6" data-swatches>
+      {%- for value in first_option.values -%}
+        {%- assign hex = '' -%}
+        {%- assign use_rgb = false -%}
+        {%- if value.swatch and value.swatch.color -%}
+          {%- assign swatch_bg = 'rgb(' | append: value.swatch.color.rgb | append: ')' -%}
+          {%- assign use_rgb = true -%}
+        {%- endif -%}
+        {%- if use_rgb == false -%}
+          {%- assign value_normalized = value | strip | downcase -%}
+          {%- for line in swatch_lines -%}
+            {%- assign line_clean = line | strip -%}
+            {%- if line_clean != '' -%}
+            {%- assign parts = line_clean | split: ' - ' -%}
+            {%- if parts.size >= 2 -%}
+              {%- assign name_part = parts[0] | strip | downcase -%}
+              {%- if name_part == value_normalized -%}
+                {%- assign hex = parts[1] | strip -%}
+                {%- unless hex contains '#' -%}
+                  {%- assign hex = '#' | append: hex -%}
+                {%- endunless -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {%- if hex == '' -%}
+            {%- assign hex = '#e5e7eb' -%}
+          {%- endif -%}
+          {%- assign swatch_bg = hex -%}
+        {%- endif -%}
+        <button type="button"
+                class="fp-card__swatch tw-transition-all focus:tw-outline-none{% if value == selected_option_value %} fp-card__swatch--selected{% endif %}"
+                style="background-color: {{ swatch_bg }};"
+                data-swatch
+                data-option-value="{{ value | escape }}"
+                aria-label="{{ value | escape }}">
+        </button>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="fp-card__info tw-flex tw-flex-col tw-flex-grow">
+    {%- if product.vendor != blank -%}
+      <p class="fp-card__vendor tw-mb-2 tw-mt-7">{{ product.vendor }}</p>
+    {%- endif -%}
+    <a href="{{ product.url }}" class="fp-card__title tw-line-clamp-2">
+      {{ product.title | escape }}
+    </a>
+    <div class="fp-card__price tw-mt-auto" data-price>
+      {%- if is_on_sale -%}
+        <span class="fp-card__price-compare tw-mr-1.5">{{ compare_at | money }}</span>
+        <span class="fp-card__price-sale">{{ price | money }}</span>
+      {%- else -%}
+        <span class="fp-card__price-regular">{{ price | money }}</span>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <script type="application/json" data-variants-json>
+    [
+      {%- for variant in product.variants -%}
+        {%- assign v_primary = variant.featured_media | default: product.featured_media -%}
+        {%- assign v_secondary = nil -%}
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}
+            {%- assign alt_n = media.alt | strip | downcase -%}
+            {%- assign opt_n = variant.option1 | strip | downcase -%}
+            {%- if alt_n == opt_n and media.id != v_primary.id -%}
+              {%- assign v_secondary = media -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {
+          "id": {{ variant.id }},
+          "option1": {{ variant.option1 | json }},
+          "price": {{ variant.price }},
+          "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+          "available": {{ variant.available | json }},
+          "price_formatted": {{ variant.price | money | json }},
+          "compare_at_price_formatted": {{ variant.compare_at_price | money | json }},
+          "primary_src": {{ v_primary | image_url: width: 533 | json }},
+          "secondary_src": {% if v_secondary %}{{ v_secondary | image_url: width: 533 | json }}{% else %}null{% endif %}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  </script>
+</div>
