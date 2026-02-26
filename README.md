@@ -1,7 +1,7 @@
-**Store - https://meetdomaine.myshopify.com/
-**Store password - meetdomaine!
+Store - https://meetdomaine.myshopify.com/
+Store password - meetdomaine!
 
-**Files:
+Files:
 - custom-featured-products.liquid,
 - custom-featured-products.js,
 - custom-featured-products.css
